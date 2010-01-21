@@ -1,7 +1,7 @@
 [jquery.print](http://github.com/smparkes/jquery.print) - jquery plugin to convert objects to strings
 ================================
 
-What you need to build your own jQuery
+What you need to build your own jquery.print
 ---------------------------------------
 * Make sure that you have Java installed (if you want to build a minified version of jquery.print).
 If not, go to this page and download "Java Runtime Environment (JRE) 5.0"  
@@ -45,6 +45,4 @@ OR
 
 `make PREFIX=~/www/ docs`
 
-If you have any questions, please feel free to ask them on the jquery.print
-mailing list, which can be found here:  
-[http://docs.jquery.com/Discussion](http://docs.jquery.com/Discussion)
+(Docs/structure shamelessly copied from jQuery);
