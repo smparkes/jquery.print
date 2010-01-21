@@ -26,12 +26,12 @@
 
       $.each(properties.concat(extra[obj.tagName.toLowerCase()] || []), function(){
         if (obj[this])
-          result.push(' ' + this.replace('className', 'class') + "=" + $.print(obj[this]))
+          result.push(' ' + this.replace('className', 'class') + "=" + $.print(obj[this]));
       });
       return "<" + obj.tagName.toLowerCase()
               + result.join('') + ">";
     }
-  }
+  };
 
   function print_object(obj, opts) {
     var seen = opts.seen || [ obj ];
@@ -82,8 +82,8 @@
       return "undefined";
     else if (typeof obj == 'boolean')
       return obj.toString();
-    else if (!obj && typeof obj == 'number')
-      return 'NaN';
+    else if (typeof obj == 'number')
+      return obj.toString();
     else if (!obj)
       return "null";
     else if (typeof obj == 'string')
@@ -92,9 +92,11 @@
       return obj.toString();
     else if (obj instanceof Array || obj.callee || obj.item)
       return print_array(obj, opts);
-    else if (typeof obj == 'function' || obj instanceof Function)
-      return obj.toString().match(/^([^)]*\))/)[1];
-    else if (obj.nodeType)
+    else if (typeof obj == 'function' || obj instanceof Function) {
+      var s = obj.toString();
+      var m = s.match(/^([^)]*\))/);
+      return m && m[1] || s;
+    } else if (obj.nodeType)
       return print_element(obj);
     else if (obj instanceof jQuery)
       return "$(" + $.print(obj.get()) + ")";
@@ -104,6 +106,6 @@
       return print_object(obj, opts);
     else
       return obj.toString().replace(/\n\s*/g, '');
-  }
+  };
 
 })(jQuery);
