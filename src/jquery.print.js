@@ -17,7 +17,7 @@
     return "[ " + result.join(", ") + " ]";
   }
 
-  function print_element(obj) {
+  function print_element(obj, opts) {
     if (obj.nodeType === 1) {
       var result = [];
       var properties = [ 'className', 'id' ];
@@ -32,24 +32,21 @@
 
       $.each(properties.concat(extra[obj.tagName.toLowerCase()] || []), function(){
         if (obj[this]) {
-          result.push(' ' + this.replace('className', 'class') + "=" + $.print(obj[this]));
+          result.push(' ' + this.replace('className', 'class') + "=" + $.print(obj[this], opts));
         }
       });
       return "<" + obj.tagName.toLowerCase() + result.join('') + ">";
     }
+    return "element of type "+obj.nodeType;
   }
 
   function print_object(obj, opts) {
-    var seen = opts.seen || [ obj ];
-
     var result = [], key, value;
     for (var k in obj) {
-      if (obj.hasOwnProperty(k) && $.inArray(obj[k], seen) < 0) {
-        seen.push(obj[k]);
-        value = $.print(obj[k], $.extend({}, opts, { max_array: 6, max_string: 40, seen: seen }));
-      } else {
-        value = "...";
+      if (!obj.hasOwnProperty(k)) {
+        continue;
       }
+      value = $.print(obj[k], $.extend({}, opts, { max_array: 6, max_string: 40 }));
       result.push(k + ": " + value);
     }
     if (result.length === 0) {
@@ -88,7 +85,36 @@
   }
 
   $.print = function(obj, options) {
-    var opts = $.extend({}, { max_array: 10, max_string: 100 }, options);
+    var global = (function(){return this;}());
+
+    if (obj === global) {
+      return obj+"";
+    }
+
+    var opts = $.extend({}, { max_array: 10,
+                              max_string: 100,
+                              seen: [],
+                              depth: -1,
+                              max_depth: 100 }, options);
+    var seen = opts.seen;
+
+    opts.depth += 1;
+    if (opts.depth > opts.max_depth) {
+      return "[truncated]";
+    }
+
+    if (obj instanceof Object &&
+        !(obj instanceof String) &&
+        !(obj instanceof Number) &&
+        !(obj instanceof Function) &&
+        !(obj instanceof Error) &&
+        !(obj instanceof Boolean) &&
+        !(obj instanceof Date) &&
+        $.inArray(obj, seen) >= 0) {
+      return "...";
+    } else {
+      seen.push(obj);
+    }
 
     if (typeof obj === 'undefined') {
       return "undefined";
@@ -109,9 +135,9 @@
       var m = s.match(/^([^)]*\))/);
       return m && m[1] || s;
     } else if (obj.nodeType) {
-      return print_element(obj);
+      return print_element(obj, opts);
     } else if (obj instanceof jQuery) {
-      return "$(" + $.print(obj.get()) + ")";
+      return "$(" + $.print(obj.get(), opts) + ")";
     } else if (obj instanceof Error) {
       return print_object(obj, $.extend({}, options, { max_string: 200 }));
     } else if (obj instanceof Object) {
