@@ -43,7 +43,8 @@
   function print_object(obj, opts) {
     var result = [], key, value;
     for (var k in obj) {
-      if (!obj.hasOwnProperty(k)) {
+      // SVGRects don't own their values in FF
+      if (!obj.hasOwnProperty(k) && !(typeof SVGRect !== "undefined" && obj instanceof SVGRect)) {
         continue;
       }
       value = $.print(obj[k], $.extend({}, opts, { max_array: 6, max_string: 40 }));
